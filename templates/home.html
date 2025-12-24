@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block content %}
+  <div>
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">User Dashboard</h1>
+
+    <!-- Success/Error Messages -->
+    {% if messages %}
+      {% for message in messages %}
+        <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-kafka-green/10 text-kafka-green{% else %}bg-kafka-red/10 text-kafka-red{% endif %} shadow-md animate-fade-in">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Topic Creation Request Form -->
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-6 transform transition-all hover:shadow-xl">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Request a New Topic</h2>
+      {% if success %}
+        <p class="text-kafka-green mb-4">{{ success }}</p>
+      {% endif %}
+      {% if error %}
+        <p class="text-kafka-red mb-4">{{ error }}</p>
+      {% endif %}
+      <form action="{% url 'home' %}" method="POST" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <label for="topic_name" class="block text-sm font-medium text-gray-700">Topic Name</label>
+          <input type="text" id="topic_name" name="topic_name" required class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-kafka-green">
+        </div>
+        <div>
+          <label for="partitions" class="block text-sm font-medium text-gray-700">Number of Partitions</label>
+          <input type="number" id="partitions" name="partitions" min="1" required class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-kafka-green">
+        </div>
+        <button type="submit" class="bg-kafka-green hover:bg-kafka-green/90 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md hover:shadow-lg">
+          Submit Request
+        </button>
+      </form>
+    </div>
+
+    <!-- Approved Requests Table -->
+    {% if uncreated_requests %}
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Your Approved Topic Requests</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Partitions</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                {% for request in uncreated_requests %}
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ request.topic_name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ request.partitions }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ request.status }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <a href="{% url 'create_topic_form' request.id %}" class="bg-kafka-green hover:bg-kafka-green/90 text-white px-4 py-2 rounded-md text-xs transition-all duration-200">
+                        Create Topic
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <p class="text-gray-500 text-center">No approved requests yet.</p>
+      </div>
+    {% endif %}
+
+    <!-- Created Topics Table -->
+    {% if created_topics %}
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden mt-6">
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Your Created Topics</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Partitions</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                {% for topic in created_topics %}
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ topic.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ topic.partitions }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <form action="{% url 'topic_detail' topic.name %}" method="GET" style="display:inline;">
+                        <button type="submit" class="bg-kafka-green hover:bg-kafka-green/90 text-white px-4 py-2 rounded-md text-xs transition-all duration-200 mr-2">
+                          View
+                        </button>
+                      </form>
+                      <form action="{% url 'delete_topic' %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="topic_ids" value="{{ topic.id }}">
+                        <button type="submit" class="bg-kafka-red hover:bg-kafka-red/90 text-white px-4 py-2 rounded-md text-xs transition-all duration-200">
+                          Delete
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <p class="text-gray-500 text-center">No created topics yet.</p>
+      </div>
+    {% endif %}
+
+    <!-- Topic Detail View (if accessed) -->
+    {% if topic %}
+      <div class="bg-white p-6 rounded-lg shadow-lg mt-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Topic Details: {{ topic.name }}</h2>
+        <p><strong>Partitions:</strong> {{ topic.partitions }}</p>
+        <p><strong>Production:</strong> {{ topic.production }}</p>
+        <p><strong>Consumption:</strong> {{ topic.consumption }}</p>
+        <p><strong>Followers:</strong> {{ topic.followers }}</p>
+        <p><strong>Observers:</strong> {{ topic.observers }}</p>
+        <p><strong>Last Produced:</strong> {{ topic.last_produced }}</p>
+        <form action="{% url 'create_partition' topic.name %}" method="POST" class="mt-4 space-y-2">
+          {% csrf_token %}
+          <div>
+            <label for="partitions" class="block text-sm font-medium text-gray-700">Delete Partitions</label>
+            <input type="number" id="partitions" name="partitions" min="1" required class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-kafka-green" placeholder="Number of partitions to delete">
+          </div>
+          <button type="submit" class="bg-kafka-orange hover:bg-kafka-orange/90 text-white px-6 py-2 rounded-md transition-all duration-200 shadow-md hover:shadow-lg">
+            Delete Partitions
+          </button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

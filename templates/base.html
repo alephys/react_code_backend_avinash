@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kafka Topic Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { 'roboto': ['Roboto', 'sans-serif'] },
+          colors: { 'kafka-green': '#4CAF50', 'kafka-red': '#EF5350' }
+        }
+      }
+    }
+    // Simple loading animation for sidebar updates
+    function showLoading() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.add('opacity-50');
+      setTimeout(() => sidebar.classList.remove('opacity-50'), 1000);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.location.pathname.includes('create_topic') || window.location.pathname.includes('admin_dashboard')) {
+        showLoading();
+      }
+    });
+  </script>
+  <style>
+    .sidebar { transition: all 0.3s ease; }
+    .highlighted { background-color: #e6f3e6 !important; border-left: 4px solid #4CAF50 !important; transition: all 0.3s ease; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-gray-200">
+  <div class="flex min-h-screen">
+    <!-- Left Sidebar -->
+    <div class="w-72 bg-white shadow-xl sidebar border-r border-gray-200">
+      {% block sidebar %}
+        <div class="p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2 border-gray-200">My Topics</h3>
+          <div class="space-y-2">
+            {% if topics %}
+              {% for topic in topics %}
+                <a href="{% url 'topic_detail' topic.name %}" class="block p-2 text-gray-700 hover:bg-kafka-green/10 hover:text-kafka-green rounded-lg transition-all duration-200 transform hover:scale-105">
+                  {{ topic.name }}
+                </a>
+              {% endfor %}
+            {% else %}
+              <p class="text-gray-500 italic">No topics yet. Create one!</p>
+            {% endif %}
+          </div>
+        </div>
+      {% endblock %}
+    </div>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <header class="bg-white shadow-md border-b p-4 flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-800">Kafka Topic Manager</h1>
+        <div class="flex items-center space-x-4">
+          <span class="text-gray-700 font-medium">{{ username }}</span>
+          <a href="{% url 'logout' %}">
+            <button class="bg-kafka-red hover:bg-kafka-red/90 text-white px-4 py-2 rounded-md transition-all duration-200 shadow-sm hover:shadow-md">
+              Logout
+            </button>
+          </a>
+        </div>
+      </header>
+      <main class="flex-1 p-6">
+        {% block content %}
+        {% endblock %}
+      </main>
+    </div>
+  </div>
+</body>
+</html>

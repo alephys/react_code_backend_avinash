@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+  <div>
+    <h2>Topic Details</h2>
+    {% if topic %}
+      <div style="font-family: Roboto, sans-serif; border: 1px solid #ccc; padding: 20px; border-radius: 8px; background-color: #f9f9f9;">
+        <p><strong>Topic Name:</strong> {{ topic.name }}</p>
+        <p><strong>Status:</strong> {% if topic.is_active %}Active{% else %}Inactive{% endif %}</p>
+        <p><strong>Partitions:</strong> {{ topic.partitions }}</p>
+        <p><strong>Production:</strong> {{ topic.production }}</p>
+        <p><strong>Consumption:</strong> {{ topic.consumption }}</p>
+        <p><strong>Followers:</strong> {{ topic.followers }}</p>
+        <p><strong>Observers:</strong> {{ topic.observers }}</p>
+        <p><strong>Last Produced:</strong> {% if topic.last_produced %}{{ topic.last_produced|date:"Y-m-d H:i:s" }}{% else %}N/A{% endif %}</p>
+        {% if request_id %}
+          <a href="{% url 'create_topic_form' request_id %}?highlight={{ topic.name|urlencode }}">
+            <button style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; font-family: Roboto, sans-serif; cursor: pointer; border-radius: 4px;">
+              Back to Create Topic
+            </button>
+          </a>
+        {% endif %}
+        <a href="{% url 'home' %}">
+          <button style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; font-family: Roboto, sans-serif; cursor: pointer; border-radius: 4px;">
+            Back to Home
+          </button>
+        </a>
+      </div>
+    {% else %}
+      <p style="color: red; font-family: Roboto, sans-serif;">Topic not found.</p>
+      <a href="{% url 'home' %}">
+        <button style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; font-family: Roboto, sans-serif; cursor: pointer; border-radius: 4px;">
+          Back to Home
+        </button>
+      </a>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block sidebar %}
+  {{ block.super }}
+{% endblock %}

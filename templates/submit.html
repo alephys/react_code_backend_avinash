@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Command</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+    <header>
+        <h2>Submit Command</h2>
+        <div class="user-info">
+            <span>{{ username }}</span>
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </header>
+    <div class="container">
+        <div class="main-content">
+            <form id="submitForm" method="POST" action="{% url 'submit' %}">
+                {% csrf_token %}
+                <input type="text" id="command" name="command" placeholder="Enter command" required>
+                <button type="submit">Submit</button>
+            </form>
+            <div id="message"></div>
+        </div>
+    </div>
+    <script src="{% static 'js/submit.js' %}"></script>
+</body>
+</html>

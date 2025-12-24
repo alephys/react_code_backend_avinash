@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+  <div>
+    {% if show_detail and topic %}
+      <!-- Topic Details -->
+      <h2>Topic Details</h2>
+      <div style="font-family: Roboto, sans-serif; border: 1px solid #ccc; padding: 20px; border-radius: 8px; background-color: #f9f9f9;">
+        <p><strong>Topic Name:</strong> {{ topic.name }}</p>
+        <p><strong>Status:</strong> {% if topic.is_active %}Active{% else %}Inactive{% endif %}</p>
+        <p><strong>Partitions:</strong> {{ topic.partitions }}</p>
+        <p><strong>Production:</strong> {{ topic.production }}</p>
+        <p><strong>Consumption:</strong> {{ topic.consumption }}</p>
+        <p><strong>Followers:</strong> {{ topic.followers }}</p>
+        <p><strong>Observers:</strong> {{ topic.observers }}</p>
+        <p><strong>Last Produced:</strong> {% if topic.last_produced %}{{ topic.last_produced|date:"Y-m-d H:i:s" }}{% else %}N/A{% endif %}</p>
+        <a href="{% url 'create_topic_form' request_id %}?highlight={{ topic.name|urlencode }}">
+          <button style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; font-family: Roboto, sans-serif; cursor: pointer; border-radius: 4px;">
+            Back to Create Topic
+          </button>
+        </a>
+      </div>
+    {% else %}
+      <!-- Success/Error Messages -->
+      {% if messages %}
+        {% for message in messages %}
+          <p style="color: {% if message.tags == 'success' %}green{% else %}red{% endif %}; font-family: Roboto, sans-serif;">
+            {{ message }}
+          </p>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Topic Creation Form -->
+      <h2>Create Topic</h2>
+      <form action="{% url 'create_topic' %}" method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 15px;">
+          <label for="topic_name" style="display: block; margin-bottom: 5px;">Topic Name:</label>
+          <input type="text" id="topic_name" name="topic_name" value="{{ topic_name }}" required 
+                  style="width: 100%; padding: 8px; font-family: Roboto, sans-serif; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label for="partitions" style="display: block; margin-bottom: 5px;">Number of Partitions:</label>
+          <input type="number" id="partitions" name="partitions" value="{{ partitions }}" min="1" required 
+                  style="width: 100px; padding: 8px; font-family: Roboto, sans-serif; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div>
+          <button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; font-family: Roboto, sans-serif; cursor: pointer; border-radius: 4px;">
+            Submit
+          </button>
+          <a href="{% url 'home' %}">
+            <button type="button" style="background-color: #EF5350; color: white; border: none; padding: 10px 20px; font-family: Roboto, sans-serif; cursor: pointer; border-radius: 4px; margin-left: 10px;">
+              Cancel
+            </button>
+          </a>
+        </div>
+      </form>
+
+      <!-- Table of Created Topics -->
+      {% if topics %}
+        <h3 style="margin-top: 30px; font-family: Roboto, sans-serif;">Created Topics</h3>
+        <form action="{% url 'delete_topic' %}" method="POST">
+          {% csrf_token %}
+          <table style="font-family: Roboto, sans-serif; border-collapse: collapse; width: 100%; margin-top: 10px;">
+            <tr style="background-color: #f2f2f2;">
+              <th style="padding: 8px; text-align: left;">Select</th>
+              <th style="padding: 8px; text-align: left;">Topic Name</th>
+              <th style="padding: 8px; text-align: left;">Status</th>
+              <th style="padding: 8px; text-align: left;">Partitions</th>
+              <th style="padding: 8px; text-align: left;">Production</th>
+              <th style="padding: 8px; text-align: left;">Consumption</th>
+              <th style="padding: 8px; text-align: left;">Followers</th>
+              <th style="padding: 8px; text-align: left;">Observers</th>
+              <th style="padding: 8px; text-align: left;">Last Produced</th>
+            </tr>
+            {% for topic in topics %}
+              <tr {% if topic.name == highlight %}class="highlighted"{% endif %}>
+                <td style="padding: 8px;">
+                  <input type="checkbox" name="topic_ids" value="{{ topic.id }}">
+                </td>
+                <td style="padding: 8px;"><a href="{% url 'topic_detail' topic.name %}?request_id={{ request_id|default:0 }}">{{ topic.name }}</a></td>
+                <td style="padding: 8px;">{% if topic.is_active %}Active{% else %}Inactive{% endif %}</td>
+                <td style="padding: 8px;">{{ topic.partitions }}</td>
+                <td style="padding: 8px;">{{ topic.production }}</td>
+                <td style="padding: 8px;">{{ topic.consumption }}</td>
+                <td style="padding: 8px;">{{ topic.followers }}</td>
+                <td style="padding: 8px;">{{ topic.observers }}</td>
+                <td style="padding: 8px;">{% if topic.last_produced %}{{ topic.last_produced|date:"Y-m-d H:i:s" }}{% else %}N/A{% endif %}</td>
+              </tr>
+            {% endfor %}
+          </table>
+          <div style="margin-top: 15px;">
+            <button type="submit" style="background-color: #EF5350; color: white; border: none; padding: 10px 20px; font-family: Roboto, sans-serif; cursor: pointer; border-radius: 4px;">
+              Delete Selected Topic
+            </button>
+          </div>
+        </form>
+        <style>
+          .highlighted {
+            background-color: #e6f3e6; /* Light green highlight */
+            border-left: 4px solid #4CAF50; /* Green border for emphasis */
+          }
+        </style>
+      {% endif %}
+    {% endif %}
+  </div>
+{% endblock %}
+{% block sidebar %}
+  {{ block.super }}
+{% endblock %}
