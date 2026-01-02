@@ -576,17 +576,17 @@ def admin_dashboard_api(request):
 
 #         created_topics = []
 
-#         # 1️⃣ Add ALL DB topics first (NON-INTERNAL)
+#         # Add ALL DB topics first (NON-INTERNAL)
 #         for db in db_topics:
 #             created_topics.append({
 #                 "id": db["id"],
 #                 "name": db["name"],
 #                 "partitions": db["partitions"],
 #                 "created_by__username": db["created_by__username"],
-#                 "is_internal": False,   # 🔥 DB topics are NEVER internal
+#                 "is_internal": False,   #  DB topics are NEVER internal
 #             })
 
-#         # 2️⃣ Add Kafka-only topics (INTERNAL)
+#         #  Add Kafka-only topics (INTERNAL)
 #         for kt_name, kt in kafka_topic_names.items():
 #             if not any(t["name"] == kt_name for t in created_topics):
 #                 created_topics.append({
@@ -1482,7 +1482,7 @@ def request_alter_topic(request, topic_id):
 #     try:
 #         topic = Topic.objects.get(id=topic_id)
 
-#         # ❌ Internal topics cannot be altered
+#         #  Internal topics cannot be altered
 #         if topic.is_internal:
 #             return JsonResponse({
 #                 "success": False,
@@ -1500,7 +1500,7 @@ def request_alter_topic(request, topic_id):
 #                 "message": "new_partitions is required"
 #             }, status=400)
 
-#         # ✅ Create ALTER request
+#         # Create ALTER request
 #         TopicRequest.objects.create(
 #             topic=topic,
 #             topic_name=topic.name,
@@ -1650,10 +1650,10 @@ def execute_confluent_command(command, topic_name=None, partitions=None):
 #         return JsonResponse({"success": False, "message": "Access denied"}, status=403)
 
 #     try:
-#         # 1️⃣ Try DB topic first (APP-CREATED)
+#         # 1️ Try DB topic first (APP-CREATED)
 #         topic = Topic.objects.filter(name=topic_name).first()
 
-#         # 2️⃣ Always fetch Kafka metadata (SOURCE OF TRUTH FOR VIEW)
+#         # 2 Always fetch Kafka metadata (SOURCE OF TRUTH FOR VIEW)
 #         admin_client = AdminClient(KAFKA_CONF)
 #         md = admin_client.list_topics(timeout=10)
 #         kafka_topic = md.topics.get(topic_name)
@@ -1664,7 +1664,7 @@ def execute_confluent_command(command, topic_name=None, partitions=None):
 #                 status=404
 #             )
 
-#         # 3️⃣ DB topic exists → NON-INTERNAL
+#         # 3️ DB topic exists → NON-INTERNAL
 #         if topic:
 #             data = {
 #                 "id": topic.id,
@@ -1683,7 +1683,7 @@ def execute_confluent_command(command, topic_name=None, partitions=None):
 #                 "is_internal": False,
 #             }
 
-#         # 4️⃣ Kafka-only topic → INTERNAL
+#         # 4️Kafka-only topic → INTERNAL
 #         else:
 #             partitions = len(kafka_topic.partitions)
 #             replication = (
@@ -2568,7 +2568,7 @@ def kafka_cluster_status(request):
         brokers = metadata.brokers or {}
         active_brokers = len(brokers)
 
-        # ⚠️ Kafka does not directly expose "inactive brokers"
+        #  Kafka does not directly expose "inactive brokers"
         # So we treat:
         # - If metadata fetch succeeds → brokers are active
         # - If fetch fails → cluster inactive
